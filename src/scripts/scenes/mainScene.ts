@@ -14,7 +14,7 @@ export default class MainScene extends Phaser.Scene {
 
     // display the Phaser.VERSION
     this.add
-      .text(this.cameras.main.width - 15, 15, `Phaser v${Phaser.VERSION}`, {
+      .text(this.cameras.main.width - 15, 15, `Phaser3 v${Phaser.VERSION}`, {
         color: '#00000F',
         fontSize: '24px'
       })
