@@ -11,6 +11,8 @@ export default class GameScene extends Phaser.Scene {
     grid: Grid;
     addingNewRoute = false;
 
+    newRouteButton: Phaser.GameObjects.Rectangle;
+
     modeText: Phaser.GameObjects.Text;
     potentialStopMarkers: Phaser.GameObjects.Group;
 
@@ -18,7 +20,7 @@ export default class GameScene extends Phaser.Scene {
 
     routes: any[] = [];
     busses: Bus[] = [];
-    money = 20000; // in cents?
+    money = 200;
     moneyText: MoneyText;
 
     colors: number[] = [
@@ -34,6 +36,8 @@ export default class GameScene extends Phaser.Scene {
     ];
 
     frameTime = 0;
+
+    stopCost = 200
 
     constructor() {
         super({ key: 'GameScene' });
@@ -106,13 +110,11 @@ export default class GameScene extends Phaser.Scene {
                             );
                         }
                         const route = {
-                            stopA: this.potentialFirstStop,
-                            stopB: marker,
                             pinA,
                             pinB,
                             routeLines,
                             id: this.routes.length,
-                            locations:locationsToDraw
+                            locations: locationsToDraw,
                         };
                         this.routes.push();
                         this.potentialFirstStop.setData('isBusStop', true);
@@ -123,9 +125,11 @@ export default class GameScene extends Phaser.Scene {
                             true
                         );
                         this.toggleNewRoute();
-
+                        this.editMoney(-this.stopCost)
                         //spawn our bus and get it to start making money
-                        this.busses.push(new Bus(this, route));
+                        this.busses.push(
+                            new Bus(this, route)
+                        );
                         return;
                     }
                     //we are picking this stop first
@@ -182,13 +186,13 @@ export default class GameScene extends Phaser.Scene {
             .text(400, 10, 'Adding Route')
             .setVisible(false);
         //some new route button
-        this.add
-            .rectangle(256, 10, 48, 22, 0x00ff00)
+        this.newRouteButton = this.add
+            .rectangle(1200, 685, 120, 42, 0x00ff00)
             .setInteractive()
             .on('pointerdown', pointer => {
                 this.toggleNewRoute();
             });
-
+        this.add.text(1160, 677, 'New Route').setColor('black');
         this.input.keyboard.addKey('ESC').on('down', evt => {
             if (this.addingNewRoute) {
                 this.toggleNewRoute();
@@ -211,6 +215,19 @@ export default class GameScene extends Phaser.Scene {
         return this.add
             .line(x1, y1, 0, 0, -1 * (x1 - x2), -1 * (y1 - y2), color)
             .setOrigin(0);
+    }
+
+    public editMoney(amountToAdd) {
+        console.log('updating money')
+        this.money += amountToAdd;
+
+        if (this.money < this.stopCost ){
+            this.newRouteButton.setActive(false)
+            this.newRouteButton.setFillStyle(0xaaaaaa)
+        } else {
+            this.newRouteButton.setActive(true)
+            this.newRouteButton.setFillStyle(0x00ff00)
+        }
     }
 
     update(time, delta) {

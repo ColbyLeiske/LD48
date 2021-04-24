@@ -118,13 +118,13 @@ export default class Grid {
         maxDistance = Infinity
     ) {
         const ids = this.weights[node.id]
-            .map((weight,index) => {
-                return {weight,index}
+            .map((weight, index) => {
+                return { weight, index };
             })
-            .filter(({weight}) => {
+            .filter(({ weight }) => {
                 return weight > minDistance && weight < maxDistance;
             })
-            .map((v) => {
+            .map(v => {
                 return v.index;
             });
         return ids.map(id => {
@@ -139,14 +139,28 @@ export default class Grid {
         );
     }
 
+    public updateEdgeWeight(nodeA: Node, nodeB: Node, newWeight: number) {
+        if (newWeight < 1) {
+            return;
+        }
+        this.edges.filter(edge => {
+            if (
+                (edge.source == nodeA && edge.dest == nodeB) ||
+                (edge.source == nodeB && edge.dest == nodeA)
+            ) {
+                edge.weight = newWeight;
+            }
+        });
+    }
+
     public loadFromJSON({ nodes, connections }) {
         this.nodes = nodes;
         this.edges = connections;
         const { dist: weights, next: paths } = this.floydWarshallAlgorithm();
         this.paths = paths;
         this.weights = weights;
-        console.log(weights)
-        console.log(paths)
+        console.log(weights);
+        console.log(paths);
         // console.log(this.getPath(nodes[0],nodes[12]))
     }
 }
