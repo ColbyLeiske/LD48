@@ -10,7 +10,7 @@ export default class Grid {
 
   public addConnection(a: Node, b: Node, weight?: number) {
     // set both ways for bidirectional graph
-    this.connections.push({ source: a, dest: b, weight: weight || 1 })
+    this.connections.push({ source: a.id, dest: b.id, weight: weight || 1 })
   }
 
   public getConnections(node: Node) {
@@ -27,6 +27,10 @@ export default class Grid {
     if (potentialNodes.length === 1) return potentialNodes[0]
 
     return new Node(-1, -1, -1)
+  }
+
+  public getNodeById(id: number){
+      return this.nodes[id]
   }
 
   public dump() {

@@ -43,7 +43,7 @@ export default class MainScene extends Phaser.Scene {
           this.addNode(node.x, node.y)
         })
         this.grid.connections.forEach(con => {
-          this.addConnection(con.source, con.dest)
+          this.addConnection(this.grid.getNodeById(con.source), this.grid.getNodeById(con.dest))
         })
       })
       
@@ -58,7 +58,7 @@ export default class MainScene extends Phaser.Scene {
         //render the node here
         this.addNode(touchX, touchY)
       })
-      
+
       this.fpsText = new FpsText(this)
     }
     
