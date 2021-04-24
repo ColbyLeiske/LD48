@@ -2,7 +2,9 @@ import Node from './node';
 
 export default class Grid {
     nodes: Node[] = [];
-    connections: any[] = [];
+    edges: any[] = [];
+    paths: any;
+    weights: any;
 
     public addNode(node: Node) {
         this.nodes.push(node);
@@ -10,7 +12,7 @@ export default class Grid {
 
     public addConnection(a: Node, b: Node, weight?: number) {
         // set both ways for bidirectional graph
-        this.connections.push({
+        this.edges.push({
             source: a.id,
             dest: b.id,
             weight: weight || 1,
@@ -18,7 +20,7 @@ export default class Grid {
     }
 
     public getConnections(node: Node) {
-        return this.connections.filter(conn => {
+        return this.edges.filter(conn => {
             conn.source === node || conn.dest === node;
         });
     }
@@ -45,14 +47,91 @@ export default class Grid {
         });
     }
 
+    public getSuitableRouteEnds(node: Node) {}
+
+    //https://www.tutorialspoint.com/The-Floyd-Warshall-algorithm-in-Javascript
+    public floydWarshallAlgorithm() {
+        let dist = {};
+        let next = {};
+
+        for (let i = 0; i < this.nodes.length; i++) {
+            dist[i] = {};
+            next[i] = {};
+        }
+
+        for (let i = 0; i < this.nodes.length; i++) {
+            // For existing edges assign the dist to be same as weight
+            this.edges.forEach(e => {
+                dist[e.source][e.dest] = e.weight;
+                dist[e.dest][e.source] = e.weight;
+                next[e.source][e.dest] = e.dest;
+                next[e.dest][e.source] = e.source;
+                
+            });
+            this.nodes.forEach(n => {
+                // For all other nodes assign it to infinity
+                if (dist[this.nodes[i].id][n.id] == undefined)
+                    dist[this.nodes[i].id][n.id] = Infinity;
+                // For self edge assign dist to be 0
+                if (this.nodes[i].id === i) {
+                    dist[i][i] = 0;
+                    next[i][i] = i;
+                }
+            });
+        }
+        this.nodes.forEach(i => {
+            this.nodes.forEach(j => {
+                this.nodes.forEach(k => {
+                    // Check if going from i to k then from k to j is better
+                    // than directly going from i to j. If yes then update
+                    // i to j value to the new value
+                    if (
+                        dist[i.id][k.id] + dist[k.id][j.id] <
+                        dist[i.id][j.id]
+                    ) {
+                        dist[i.id][j.id] = dist[i.id][k.id] + dist[k.id][j.id];
+                        next[i.id][j.id] = next[i.id][k.id];
+                    }
+                });
+            });
+        });
+        return { dist, next };
+    }
+
+    public getPath(nodeA:Node, nodeB:Node) {
+        if (!this.paths) return [];
+        if (!this.paths[nodeA.id][nodeB.id]) return [];
+        let path = [nodeA];
+        while (nodeA != nodeB) {
+            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id])
+            path.push(nodeA)
+        }
+        return path
+    }
+
+    public getNodesFurtherThanDistance(node: Node, distance: number) {
+        const ids = this.weights[node.id].filter((weight) => {
+            weight > distance
+        })
+        return ids.map((id) => {
+            return this.getNodeById(id)
+        })
+    }
+
     public dump() {
         console.log(
-            JSON.stringify({ nodes: this.nodes, connections: this.connections })
+            JSON.stringify({ nodes: this.nodes, connections: this.edges })
         );
     }
 
     public loadFromJSON({ nodes, connections }) {
         this.nodes = nodes;
-        this.connections = connections;
+        this.edges = connections;
+        const { dist: weights, next: paths } = this.floydWarshallAlgorithm();
+        this.paths = paths;
+        this.weights = weights;
+        console.log(weights)
+        console.log(paths)
+        console.log(this.getPath(nodes[0],nodes[12]))
     }
 }

@@ -35,7 +35,7 @@ export default class EditorScene extends Phaser.Scene {
           const color = node.canBeBusstop ? 0x00ff00 : 0xff0000;
           this.addNode(node.x, node.y, color);
         });
-        this.grid.connections.forEach(con => {
+        this.grid.edges.forEach(con => {
           this.addConnection(
             this.grid.getNodeById(con.source),
             this.grid.getNodeById(con.dest)
