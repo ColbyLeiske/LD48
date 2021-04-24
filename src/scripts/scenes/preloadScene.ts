@@ -4,9 +4,9 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('phaser-logo', 'assets/img/phaser-logo.png')
     this.load.image('map','assets/maps/startermap.png')
     this.load.image('stopPin','assets/misc/pin.png')
+    this.load.image('busIcon','assets/misc/bus.png')
   }
 
   create() {
