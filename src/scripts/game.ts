@@ -1,5 +1,6 @@
 import 'phaser'
 import EditorScene from './scenes/editorScene'
+import GameScene from './scenes/gameScene'
 import PreloadScene from './scenes/preloadScene'
 
 const DEFAULT_WIDTH = 1280
@@ -15,7 +16,7 @@ const config = {
     width: DEFAULT_WIDTH,
     height: DEFAULT_HEIGHT
   },
-  scene: [PreloadScene, EditorScene],
+  scene: [PreloadScene, GameScene],
 }
 
 window.addEventListener('load', () => {
