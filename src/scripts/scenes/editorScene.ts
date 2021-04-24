@@ -17,56 +17,51 @@ export default class MainScene extends Phaser.Scene {
   create() {
     // new PhaserLogo(this, this.cameras.main.width / 2, 0)
     this.grid = new Grid()
-    this.add.sprite(0,0,'map').setOrigin(0)
-    // display the Phaser.VERSION
-    // this.add
-    //   .text(this.cameras.main.width - 15, 15, `Phaser3 v${Phaser.VERSION}`, {
-      //     color: '#00000F',
-      //     fontSize: '24px'
-      //   })
-      //   .setOrigin(1, 0)
-      this.add
+    this.add.sprite(0, 0, 'map').setOrigin(0)
+
+    this.add
       .rectangle(256, 16, 32, 16, 0x00ff00)
       .setInteractive()
       .on('pointerdown', pointer => {
-        console.log('pressed down')
         this.grid.dump()
       })
-      
-      this.add
+
+    this.add
       .rectangle(256 * 2, 16, 32, 16, 0xf0f00f)
       .setInteractive()
       .on('pointerdown', pointer => {
-        console.log('pressed down')
         this.grid.loadFromJSON(mapData)
         this.grid.nodes.forEach(node => {
-          this.addNode(node.x, node.y)
+          const color = node.canBeBusstop ? 0x00ff00 : 0xff0000
+          this.addNode(node.x, node.y,color)
         })
         this.grid.connections.forEach(con => {
           this.addConnection(this.grid.getNodeById(con.source), this.grid.getNodeById(con.dest))
         })
       })
-      
-      this.input.on('pointerdown', pointer => {
-        const key = this.input.keyboard.addKey('SPACE')
-        if (key.isUp) {
-          return
-        }
-        const touchX = pointer.x
-        const touchY = pointer.y
-        this.grid.addNode(new Node(Math.round(touchX), Math.round(touchY), this.grid.nodes.length))
-        //render the node here
-        this.addNode(touchX, touchY)
-      })
 
-      this.fpsText = new FpsText(this)
-    }
-    
-    private addNode(x: number, y: number) {
-      this.add
-      .circle(x, y, 5, 0xff0000)
+    this.input.on('pointerdown', pointer => {
+      const key = this.input.keyboard.addKey('SPACE')
+      if (key.isUp) {
+        return
+      }
+      const touchX = pointer.x
+      const touchY = pointer.y
+      this.grid.addNode(new Node(Math.round(touchX), Math.round(touchY), this.grid.nodes.length))
+
+      this.addNode(touchX, touchY)
+    })
+
+    this.fpsText = new FpsText(this)
+  }
+
+  private addNode(x: number, y: number, color: number = 0xff0000) {
+    const cir = this.add
+      .circle(x, y, 5, color)
       .setInteractive()
-      .on('pointerdown', pointer => {
+    cir.on('pointerdown', pointer => {
+      const editKey = this.input.keyboard.addKey('E')
+      if (editKey.isDown) {
         if (this.editing) {
           const curNode = this.grid.getNode(pointer)
           if (curNode.id == -1) {
@@ -82,7 +77,18 @@ export default class MainScene extends Phaser.Scene {
         console.log('now editing')
         this.editing = true
         this.editedStartNode = this.grid.getNode(pointer)
-      })
+      }
+      const inspectKey = this.input.keyboard.addKey('V')
+      if (inspectKey.isDown){
+        console.log(this.grid.getNode(pointer))
+      }
+
+      const noBusStopKey = this.input.keyboard.addKey('B')
+      if (noBusStopKey.isDown){
+        const node = this.grid.getNode(pointer)
+        this.grid.nodes[node.id].canBeBusstop = !this.grid.nodes[node.id].canBeBusstop;
+      }
+    })
   }
 
   private addConnection(nodeA: Node, nodeB: Node) {
