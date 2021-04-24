@@ -7,12 +7,13 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('map','assets/maps/startermap.png')
     this.load.image('stopPin','assets/misc/pin.png')
     this.load.image('pin','assets/misc/pinclear.png')
+    this.load.image('noMoneyPin','assets/misc/nomoneypin.png')
     this.load.image('bus','assets/misc/bus.png')
   }
 
   create() {
-    this.scene.start('editorScene')
-    // this.scene.start('GameScene')
+    // this.scene.start('editorScene')
+    this.scene.start('GameScene')
 
     /**
      * This is how you would dynamically import the mainScene class (with code splitting),

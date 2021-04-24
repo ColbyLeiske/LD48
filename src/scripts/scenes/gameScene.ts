@@ -214,7 +214,8 @@ export default class GameScene extends Phaser.Scene {
     private addLine(x1, y1, x2, y2, color: number) {
         return this.add
             .line(x1, y1, 0, 0, -1 * (x1 - x2), -1 * (y1 - y2), color)
-            .setOrigin(0);
+            .setOrigin(0)
+            .setLineWidth(2);
     }
 
     public editMoney(amountToAdd) {
