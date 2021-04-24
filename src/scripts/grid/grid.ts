@@ -55,7 +55,7 @@ export default class Grid {
         let next = {};
 
         for (let i = 0; i < this.nodes.length; i++) {
-            dist[i] = {};
+            dist[i] = [];
             next[i] = {};
         }
 
@@ -108,12 +108,18 @@ export default class Grid {
         }
         return path
     }
+    public getPathById(nodeA:number, nodeB:number) {
+        return this.getPath(this.getNodeById(nodeA),this.getNodeById(nodeB))
+    }
 
     public getNodesFurtherThanDistance(node: Node, distance: number) {
         const ids = this.weights[node.id].filter((weight) => {
-            weight > distance
+            return weight > distance && weight != Infinity
+        }).map((v,k) => {
+            return k
         })
         return ids.map((id) => {
+            // console.log(id)
             return this.getNodeById(id)
         })
     }
@@ -130,8 +136,8 @@ export default class Grid {
         const { dist: weights, next: paths } = this.floydWarshallAlgorithm();
         this.paths = paths;
         this.weights = weights;
-        console.log(weights)
-        console.log(paths)
-        console.log(this.getPath(nodes[0],nodes[12]))
+        // console.log(weights)
+        // console.log(paths)
+        // console.log(this.getPath(nodes[0],nodes[12]))
     }
 }

@@ -51,6 +51,7 @@
     "workbox-webpack-plugin": "^6.0.2"
   },
   "dependencies": {
+    "lodash": "^4.17.21",
     "phaser": "^3.53.1"
   }
 }

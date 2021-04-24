@@ -96,7 +96,7 @@ export default class EditorScene extends Phaser.Scene {
   }
 
   private addConnection(nodeA: Node, nodeB: Node) {
-    this.add
+    return this.add
       .line(
         nodeA.x,
         nodeA.y,
