@@ -99,6 +99,9 @@ export default class Grid {
     }
 
     public getPath(nodeA: Node, nodeB: Node) {
+        // if (this.memoPath.get({n1:nodeA.id,n2:nodeB.id}])) {
+        //     return this.memoPath[nodeA.id][nodeB.id]
+        // }
         if (!this.paths) return [];
         if (!this.paths[nodeA.id][nodeB.id]) return [];
         let path = [nodeA];
@@ -117,7 +120,7 @@ export default class Grid {
         minDistance: number,
         maxDistance = Infinity
     ) {
-        const ids = this.weights[node.id]
+        return this.weights[node.id]
             .map((weight, index) => {
                 return { weight, index };
             })
@@ -125,12 +128,8 @@ export default class Grid {
                 return weight > minDistance && weight < maxDistance;
             })
             .map(v => {
-                return v.index;
+                return this.getNodeById(v.index);
             });
-        return ids.map(id => {
-            // console.log(id)
-            return this.getNodeById(id);
-        });
     }
 
     public dump() {

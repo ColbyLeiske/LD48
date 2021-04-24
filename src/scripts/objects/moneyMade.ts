@@ -1,6 +1,6 @@
 export default class MoneyMade extends Phaser.GameObjects.Text {
-    constructor(scene: Phaser.Scene, x, y) {
-        super(scene, x, y-10, '+$100', { color: 'black', fontSize: '12px' });
+    constructor(scene: Phaser.Scene, x, y,money) {
+        super(scene, x, y-10, `+$${money}`, { color: 'black', fontSize: '12px' });
         scene.add.existing(this);
         scene.tweens.add({
             targets: this,

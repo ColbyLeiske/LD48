@@ -20,14 +20,12 @@ export default class GameScene extends Phaser.Scene {
 
     routes: any[] = [];
     busses: Bus[] = [];
-    money = 200;
+    money = 500;
     moneyText: MoneyText;
 
     colors: number[] = [
         0x1ea362,
-        0xffe047,
         0x4a89f3,
-        0xffeb99,
         0x506487,
         0x57cac6,
         0xbcda6e,
@@ -37,7 +35,8 @@ export default class GameScene extends Phaser.Scene {
 
     frameTime = 0;
 
-    stopCost = 200
+    stopCost = 200;
+    baseStopCost = 250;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -75,12 +74,13 @@ export default class GameScene extends Phaser.Scene {
                             .setActive(true);
                         return;
                     }
+                    //about to finalize new route
                     if (this.potentialFirstStop) {
                         //we have picked our two stops
                         //create a route here
 
                         const color = _.sample(this.colors);
-
+                        console.log(color);
                         const pinA = new StopMarker(
                             this,
                             this.potentialFirstStop.x - 2,
@@ -125,38 +125,38 @@ export default class GameScene extends Phaser.Scene {
                             true
                         );
                         this.toggleNewRoute();
-                        this.editMoney(-this.stopCost)
+                        this.editMoney(-this.stopCost);
                         //spawn our bus and get it to start making money
-                        this.busses.push(
-                            new Bus(this, route)
-                        );
+                        this.busses.push(new Bus(this, route));
                         return;
                     }
+
                     //we are picking this stop first
                     this.potentialFirstStop = marker;
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 3;
-                    console.log(node);
+                    const minDistance = 5;// technically in screen space and eucledian distance
+
                     const suitableEnds = this.grid.getNodesInRange(
                         node,
                         minDistance
                     );
-                    const prunedEnds = suitableEnds.filter(node => {
-                        console.log(
-                            `pathing between ${this.potentialFirstStop?.getData(
-                                'nodeid'
-                            )} and ${node.id}`
-                        );
-                        return (
-                            this.grid.getPathById(
-                                this.potentialFirstStop?.getData('nodeid'),
-                                node.id
-                            ).length != 0
-                        );
-                    });
-                    const suitableIds = prunedEnds.map(n => n.id);
+                    console.log(`within range ${JSON.stringify(suitableEnds)}`)
+                    // const prunedEnds = suitableEnds.filter(node => {
+                    //     console.log(
+                    //         `pathing between ${this.potentialFirstStop?.getData(
+                    //             'nodeid'
+                    //         )} and ${node.id}`
+                    //     );
+                    //     return (
+                    //         this.grid.getPathById(
+                    //             this.potentialFirstStop?.getData('nodeid'),
+                    //             node.id
+                    //         ).length != 0
+                    //     );
+                    // });
+                    const suitableIds = suitableEnds.map(n => n.id);
                     // console.log(suitableIds)
                     this.potentialStopMarkers
                         .getChildren()
@@ -219,15 +219,15 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public editMoney(amountToAdd) {
-        console.log('updating money')
+        console.log('updating money');
         this.money += amountToAdd;
 
-        if (this.money < this.stopCost ){
-            this.newRouteButton.setActive(false)
-            this.newRouteButton.setFillStyle(0xaaaaaa)
+        if (this.money < this.stopCost) {
+            this.newRouteButton.setActive(false);
+            this.newRouteButton.setFillStyle(0xaaaaaa);
         } else {
-            this.newRouteButton.setActive(true)
-            this.newRouteButton.setFillStyle(0x00ff00)
+            this.newRouteButton.setActive(true);
+            this.newRouteButton.setFillStyle(0x00ff00);
         }
     }
 
