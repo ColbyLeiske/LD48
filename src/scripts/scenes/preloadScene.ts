@@ -12,8 +12,8 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    // this.scene.start('editorScene')
-    this.scene.start('GameScene')
+    this.scene.start('editorScene')
+    // this.scene.start('GameScene')
 
     /**
      * This is how you would dynamically import the mainScene class (with code splitting),
