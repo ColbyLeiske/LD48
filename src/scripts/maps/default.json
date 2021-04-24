@@ -611,6 +611,167 @@
             "id": 96,
             "canBeBusstop": true,
             "isBusstop": false
+        },
+        {
+            "x": 972,
+            "y": 29,
+            "id": 97,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 889,
+            "y": 81,
+            "id": 98,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 783,
+            "y": 89,
+            "id": 99,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 687,
+            "y": 42,
+            "id": 100,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 609,
+            "y": 66,
+            "id": 101,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 534,
+            "y": 112,
+            "id": 102,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 406,
+            "y": 105,
+            "id": 103,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 338,
+            "y": 69,
+            "id": 104,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 283,
+            "y": 76,
+            "id": 105,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 220,
+            "y": 46,
+            "id": 106,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 196,
+            "y": 57,
+            "id": 107,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 106,
+            "y": 484,
+            "id": 108,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 145,
+            "y": 500,
+            "id": 109,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 36,
+            "y": 525,
+            "id": 110,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 566,
+            "y": 593,
+            "id": 111,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 511,
+            "y": 662,
+            "id": 112,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 503,
+            "y": 719,
+            "id": 113,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1119,
+            "y": 480,
+            "id": 114,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1094,
+            "y": 550,
+            "id": 115,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1094,
+            "y": 641,
+            "id": 116,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1053,
+            "y": 693,
+            "id": 117,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1203,
+            "y": 200,
+            "id": 118,
+            "canBeBusstop": false,
+            "isBusstop": false
+        },
+        {
+            "x": 1217,
+            "y": 172,
+            "id": 119,
+            "canBeBusstop": false,
+            "isBusstop": false
         }
     ],
     "connections": [
@@ -647,11 +808,6 @@
         {
             "source": 17,
             "dest": 15,
-            "weight": 1
-        },
-        {
-            "source": 15,
-            "dest": 16,
             "weight": 1
         },
         {
@@ -1297,6 +1453,136 @@
         {
             "source": 70,
             "dest": 69,
+            "weight": 1
+        },
+        {
+            "source": 32,
+            "dest": 92,
+            "weight": 1
+        },
+        {
+            "source": 97,
+            "dest": 15,
+            "weight": 1
+        },
+        {
+            "source": 97,
+            "dest": 97,
+            "weight": 1
+        },
+        {
+            "source": 97,
+            "dest": 16,
+            "weight": 1
+        },
+        {
+            "source": 97,
+            "dest": 98,
+            "weight": 1
+        },
+        {
+            "source": 98,
+            "dest": 99,
+            "weight": 1
+        },
+        {
+            "source": 99,
+            "dest": 100,
+            "weight": 1
+        },
+        {
+            "source": 100,
+            "dest": 101,
+            "weight": 1
+        },
+        {
+            "source": 101,
+            "dest": 102,
+            "weight": 1
+        },
+        {
+            "source": 102,
+            "dest": 103,
+            "weight": 1
+        },
+        {
+            "source": 103,
+            "dest": 104,
+            "weight": 1
+        },
+        {
+            "source": 104,
+            "dest": 105,
+            "weight": 1
+        },
+        {
+            "source": 105,
+            "dest": 106,
+            "weight": 1
+        },
+        {
+            "source": 106,
+            "dest": 107,
+            "weight": 1
+        },
+        {
+            "source": 1,
+            "dest": 108,
+            "weight": 1
+        },
+        {
+            "source": 108,
+            "dest": 109,
+            "weight": 1
+        },
+        {
+            "source": 108,
+            "dest": 110,
+            "weight": 1
+        },
+        {
+            "source": 7,
+            "dest": 111,
+            "weight": 1
+        },
+        {
+            "source": 111,
+            "dest": 112,
+            "weight": 1
+        },
+        {
+            "source": 112,
+            "dest": 113,
+            "weight": 1
+        },
+        {
+            "source": 11,
+            "dest": 114,
+            "weight": 1
+        },
+        {
+            "source": 114,
+            "dest": 115,
+            "weight": 1
+        },
+        {
+            "source": 115,
+            "dest": 116,
+            "weight": 1
+        },
+        {
+            "source": 116,
+            "dest": 117,
+            "weight": 1
+        },
+        {
+            "source": 12,
+            "dest": 118,
+            "weight": 1
+        },
+        {
+            "source": 118,
+            "dest": 119,
             "weight": 1
         }
     ]

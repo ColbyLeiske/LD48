@@ -7,10 +7,11 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('map','assets/maps/startermap.png')
     this.load.image('stopPin','assets/misc/pin.png')
     this.load.image('pin','assets/misc/pinclear.png')
-    this.load.image('busIcon','assets/misc/bus.png')
+    this.load.image('bus','assets/misc/bus.png')
   }
 
   create() {
+    // this.scene.start('editorScene')
     this.scene.start('GameScene')
 
     /**

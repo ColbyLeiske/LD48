@@ -5,6 +5,7 @@ import StopMarker from '../objects/stopMarker';
 import Node from '../grid/node';
 
 import _ from 'lodash';
+import Bus from '../objects/bus';
 
 export default class GameScene extends Phaser.Scene {
     grid: Grid;
@@ -16,8 +17,8 @@ export default class GameScene extends Phaser.Scene {
     potentialFirstStop: Phaser.GameObjects.Sprite | undefined;
 
     routes: any[] = [];
-
-    money: number; // in cents?
+    busses: Bus[] = [];
+    money = 20000; // in cents?
     moneyText: MoneyText;
 
     colors: number[] = [
@@ -31,6 +32,8 @@ export default class GameScene extends Phaser.Scene {
         0xf3716f,
         0xd34f59,
     ];
+
+    frameTime = 0;
 
     constructor() {
         super({ key: 'GameScene' });
@@ -54,6 +57,12 @@ export default class GameScene extends Phaser.Scene {
                     .setData('nodeid', node.id);
 
                 marker.on('pointerdown', pointer => {
+                    const inspectKey = this.input.keyboard.addKey('V');
+                    if (inspectKey.isDown) {
+                        console.log(this.grid.getNode(pointer));
+                        return;
+                    }
+
                     if (this.potentialFirstStop === marker) {
                         this.potentialFirstStop = undefined;
                         marker.clearTint();
@@ -65,24 +74,18 @@ export default class GameScene extends Phaser.Scene {
                     if (this.potentialFirstStop) {
                         //we have picked our two stops
                         //create a route here
-                        this.potentialFirstStop.setData('isBusStop', true);
-                        marker.setData('isBusStop', true);
-                        this.potentialStopMarkers.remove(marker, true);
-                        this.potentialStopMarkers.remove(
-                            this.potentialFirstStop,
-                            true
-                        );
+
                         const color = _.sample(this.colors);
 
                         const pinA = new StopMarker(
                             this,
-                            this.potentialFirstStop.x,
+                            this.potentialFirstStop.x - 2,
                             this.potentialFirstStop.y - 2,
                             color
                         );
                         const pinB = new StopMarker(
                             this,
-                            marker.x,
+                            marker.x - 2,
                             marker.y - 2,
                             color
                         );
@@ -102,15 +105,27 @@ export default class GameScene extends Phaser.Scene {
                                 this.addLine(x1, y1, x2, y2, color)
                             );
                         }
-
-                        this.routes.push({
+                        const route = {
                             stopA: this.potentialFirstStop,
                             stopB: marker,
                             pinA,
                             pinB,
                             routeLines,
-                        });
+                            id: this.routes.length,
+                            locations:locationsToDraw
+                        };
+                        this.routes.push();
+                        this.potentialFirstStop.setData('isBusStop', true);
+                        marker.setData('isBusStop', true);
+                        this.potentialStopMarkers.remove(marker, true);
+                        this.potentialStopMarkers.remove(
+                            this.potentialFirstStop,
+                            true
+                        );
                         this.toggleNewRoute();
+
+                        //spawn our bus and get it to start making money
+                        this.busses.push(new Bus(this, route));
                         return;
                     }
                     //we are picking this stop first
@@ -118,12 +133,26 @@ export default class GameScene extends Phaser.Scene {
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 5;
-                    const suitableEnds = this.grid.getNodesFurtherThanDistance(
+                    const minDistance = 3;
+                    console.log(node);
+                    const suitableEnds = this.grid.getNodesInRange(
                         node,
                         minDistance
                     );
-                    const suitableIds = suitableEnds.map(n => n.id);
+                    const prunedEnds = suitableEnds.filter(node => {
+                        console.log(
+                            `pathing between ${this.potentialFirstStop?.getData(
+                                'nodeid'
+                            )} and ${node.id}`
+                        );
+                        return (
+                            this.grid.getPathById(
+                                this.potentialFirstStop?.getData('nodeid'),
+                                node.id
+                            ).length != 0
+                        );
+                    });
+                    const suitableIds = prunedEnds.map(n => n.id);
                     // console.log(suitableIds)
                     this.potentialStopMarkers
                         .getChildren()
@@ -184,7 +213,15 @@ export default class GameScene extends Phaser.Scene {
             .setOrigin(0);
     }
 
-    update() {
+    update(time, delta) {
         this.moneyText.update(this.money);
+
+        this.frameTime += delta;
+
+        if (this.frameTime > 16.5) {
+            this.frameTime = 0;
+
+            // Code that relies on a consistent 60 update per second
+        }
     }
 }

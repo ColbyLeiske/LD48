@@ -7,7 +7,7 @@ export default class MoneyText extends Phaser.GameObjects.Text {
 
   public update(money) {
     // in cents
-    this.setText(`Cash: ${Math.floor(money * 100)}`)
+    this.setText(`Cash: $${Math.floor(money / 100)}`)
   }
 }
 

@@ -17,6 +17,11 @@ export default class Grid {
             dest: b.id,
             weight: weight || 1,
         });
+        this.edges.push({
+            dest: a.id,
+            source: b.id,
+            weight: weight || 1,
+        });
     }
 
     public getConnections(node: Node) {
@@ -47,8 +52,6 @@ export default class Grid {
         });
     }
 
-    public getSuitableRouteEnds(node: Node) {}
-
     //https://www.tutorialspoint.com/The-Floyd-Warshall-algorithm-in-Javascript
     public floydWarshallAlgorithm() {
         let dist = {};
@@ -56,17 +59,14 @@ export default class Grid {
 
         for (let i = 0; i < this.nodes.length; i++) {
             dist[i] = [];
-            next[i] = {};
+            next[i] = [];
         }
 
         for (let i = 0; i < this.nodes.length; i++) {
             // For existing edges assign the dist to be same as weight
             this.edges.forEach(e => {
                 dist[e.source][e.dest] = e.weight;
-                dist[e.dest][e.source] = e.weight;
                 next[e.source][e.dest] = e.dest;
-                next[e.dest][e.source] = e.source;
-                
             });
             this.nodes.forEach(n => {
                 // For all other nodes assign it to infinity
@@ -98,30 +98,39 @@ export default class Grid {
         return { dist, next };
     }
 
-    public getPath(nodeA:Node, nodeB:Node) {
+    public getPath(nodeA: Node, nodeB: Node) {
         if (!this.paths) return [];
         if (!this.paths[nodeA.id][nodeB.id]) return [];
         let path = [nodeA];
         while (nodeA != nodeB) {
-            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id])
-            path.push(nodeA)
+            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id]);
+            path.push(nodeA);
         }
-        return path
+        return path;
     }
-    public getPathById(nodeA:number, nodeB:number) {
-        return this.getPath(this.getNodeById(nodeA),this.getNodeById(nodeB))
+    public getPathById(nodeA: number, nodeB: number) {
+        return this.getPath(this.getNodeById(nodeA), this.getNodeById(nodeB));
     }
 
-    public getNodesFurtherThanDistance(node: Node, distance: number) {
-        const ids = this.weights[node.id].filter((weight) => {
-            return weight > distance && weight != Infinity
-        }).map((v,k) => {
-            return k
-        })
-        return ids.map((id) => {
+    public getNodesInRange(
+        node: Node,
+        minDistance: number,
+        maxDistance = Infinity
+    ) {
+        const ids = this.weights[node.id]
+            .map((weight,index) => {
+                return {weight,index}
+            })
+            .filter(({weight}) => {
+                return weight > minDistance && weight < maxDistance;
+            })
+            .map((v) => {
+                return v.index;
+            });
+        return ids.map(id => {
             // console.log(id)
-            return this.getNodeById(id)
-        })
+            return this.getNodeById(id);
+        });
     }
 
     public dump() {
@@ -136,8 +145,8 @@ export default class Grid {
         const { dist: weights, next: paths } = this.floydWarshallAlgorithm();
         this.paths = paths;
         this.weights = weights;
-        // console.log(weights)
-        // console.log(paths)
+        console.log(weights)
+        console.log(paths)
         // console.log(this.getPath(nodes[0],nodes[12]))
     }
 }
