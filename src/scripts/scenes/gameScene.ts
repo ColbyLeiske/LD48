@@ -45,7 +45,10 @@ export default class GameScene extends Phaser.Scene {
     create() {
         this.add.sprite(0, 0, 'map').setOrigin(0);
         this.moneyText = new MoneyText(this);
-
+        const swapKey = this.input.keyboard.addKey('Q')
+        swapKey.on('down',(evt) => {
+          this.scene.start('editorScene')
+        })
         this.grid = new Grid();
         this.grid.loadFromJSON(mapData);
 
@@ -136,7 +139,7 @@ export default class GameScene extends Phaser.Scene {
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 5;// technically in screen space and eucledian distance
+                    const minDistance = 2;// technically in screen space and eucledian distance
 
                     const suitableEnds = this.grid.getNodesInRange(
                         node,

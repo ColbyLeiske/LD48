@@ -10,6 +10,8 @@ export default class EditorScene extends Phaser.Scene {
     editing: boolean;
     editedStartNode: Node;
 
+    lines = new Map();
+
     constructor() {
         super({ key: 'editorScene' });
     }
@@ -19,6 +21,10 @@ export default class EditorScene extends Phaser.Scene {
         this.grid = new Grid();
         this.add.sprite(0, 0, 'map').setOrigin(0);
 
+        const swapKey = this.input.keyboard.addKey('Q');
+        swapKey.on('down', evt => {
+            this.scene.start('GameScene');
+        });
         this.add
             .rectangle(256, 16, 32, 16, 0x00ff00)
             .setInteractive()
@@ -52,15 +58,13 @@ export default class EditorScene extends Phaser.Scene {
             const touchX = this.input.activePointer.worldX;
             const touchY = this.input.activePointer.worldY;
             const newNode = new Node(
-              Math.round(touchX),
-              Math.round(touchY),
-              this.grid.nodes.length
-          )
-            this.grid.addNode(
-              newNode
+                Math.round(touchX),
+                Math.round(touchY),
+                this.grid.nodes.length
             );
+            this.grid.addNode(newNode);
 
-            this.addNode(touchX, touchY,newNode.id);
+            this.addNode(touchX, touchY, newNode.id);
         });
 
         this.input.on(
@@ -80,7 +84,7 @@ export default class EditorScene extends Phaser.Scene {
             }
             const editKey = this.input.keyboard.addKey('C');
             if (!editKey.isDown) {
-              return
+                return;
             }
             this.cameras.main.scrollX -=
                 (pointer.x - pointer.prevPosition.x) / this.cameras.main.zoom;
@@ -91,18 +95,76 @@ export default class EditorScene extends Phaser.Scene {
         this.fpsText = new FpsText(this);
     }
 
-    private addNode(x: number, y: number, id:number, color: number = 0xff0000) {
+    private addNode(
+        x: number,
+        y: number,
+        id: number,
+        color: number = 0xff0000
+    ) {
         const cir = this.add.circle(x, y, 5, color).setInteractive();
-        this.add.text(x,y,id.toString(),{ color: 'black', fontSize: '12px' }).setOrigin(0)
+        this.add
+            .text(x, y, id.toString(), { color: 'black', fontSize: '12px' })
+            .setOrigin(0);
         cir.on('pointerdown', pointer => {
             const editKey = this.input.keyboard.addKey('E');
             if (editKey.isDown) {
+                if (
+                    this.editing &&
+                    this.editedStartNode === this.grid.getNode(pointer)
+                ) {
+                    this.editedStartNode = new Node(-1, -1, -1);
+                    this.editing = false;
+                    console.log('not editing anymore');
+                    return;
+                }
                 if (this.editing) {
                     const curNode = this.grid.getNode(pointer);
                     if (curNode.id == -1) {
+                        console.log('early return');
                         return;
                     }
-                    this.grid.addConnection(this.editedStartNode, curNode);
+                    const weight = Math.trunc(
+                        Math.max(
+                            Math.sqrt(
+                                Math.pow(
+                                    this.editedStartNode.x - curNode.x,
+                                    2
+                                ) +
+                                    Math.pow(
+                                        this.editedStartNode.y - curNode.y,
+                                        2
+                                    )
+                            ),
+                            1
+                        )
+                    );
+                    const edge = this.grid.edges.filter(({ dest, source }) => {
+                        return (
+                            (this.editedStartNode.id == source &&
+                                curNode.id == dest) ||
+                            (this.editedStartNode.id == dest &&
+                                curNode.id == source)
+                        );
+                    });
+                    if (edge.length) {
+                        console.log('truying to remove edge');
+                        //remove connection and dip
+                        const rEdge = edge[0];
+                        const tempIndex = this.grid.edges.indexOf(rEdge);
+                        this.grid.edges.splice(tempIndex);
+                        console.log(`trying `,{a:this.editedStartNode.id,b:curNode.id})
+                        console.log('lines:',this.lines)
+                        this.lines.get(JSON.stringify({a:this.editedStartNode.id,b:curNode.id}))?.setVisible(false).destroy()
+                        this.lines.get(JSON.stringify({a:curNode.id,b:this.editedStartNode.id}))?.setVisible(false).destroy()
+                        this.lines.delete(JSON.stringify({a:this.editedStartNode.id,b:curNode.id}))
+                        return;
+                    }
+
+                    this.grid.addConnection(
+                        this.editedStartNode,
+                        curNode,
+                        weight
+                    );
                     this.addConnection(this.editedStartNode, curNode);
                     this.editedStartNode = new Node(-1, -1, -1);
                     this.editing = false;
@@ -129,7 +191,7 @@ export default class EditorScene extends Phaser.Scene {
     }
 
     private addConnection(nodeA: Node, nodeB: Node) {
-        return this.add
+        const line = this.add
             .line(
                 nodeA.x,
                 nodeA.y,
@@ -139,13 +201,16 @@ export default class EditorScene extends Phaser.Scene {
                 -1 * (nodeA.y - nodeB.y),
                 0x0000ff
             )
-            .setOrigin(0)
-            // .setInteractive()
-            // .on('pointerdown', pointer => {
-            //     const newWeight = prompt('enter new weight of connection', '');
-            //     if (!newWeight) return
-            //     this.grid.updateEdgeWeight(nodeA, nodeB, +newWeight);
-            // });
+            .setOrigin(0);
+        this.lines.set(JSON.stringify({ a: nodeA.id, b: nodeB.id }), line);
+        console.log({ a: nodeA.id, b: nodeB.id }, line)
+        return
+        // .setInteractive()
+        // .on('pointerdown', pointer => {
+        //     const newWeight = prompt('enter new weight of connection', '');
+        //     if (!newWeight) return
+        //     this.grid.updateEdgeWeight(nodeA, nodeB, +newWeight);
+        // });
     }
 
     update() {
