@@ -43,6 +43,22 @@ export default class GameScene extends Phaser.Scene {
         0xbcda6e,
         0xf3716f,
         0xd34f59,
+        0xc3ecb2,
+        0xaadaff,
+        0xbcda6e,
+        0xe97439,
+        0xe64a39,
+        0xedd157,
+        0x6f1bc6,
+        0x65ed99,
+        0xd9153b,
+        0xff1d47,
+        0x333333,
+        0xff6a6a,
+        0x6a9838,
+        0xeb8e00,
+        0xed7770,
+        0x5f7aff,
     ];
 
     frameTime = 0;
@@ -275,7 +291,7 @@ export default class GameScene extends Phaser.Scene {
         this.potentialStopMarkers.setVisible(false).setActive(false);
 
         this.modeText = this.add
-            .text(400, 10, 'Adding Route')
+            .text(425, 20, 'Adding Route')
             .setVisible(false);
         //some new route button
         this.newRouteButton = this.add
@@ -300,6 +316,16 @@ export default class GameScene extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', pointer => {
                 //upgrade busses which increases reliability and speed?
+                if  (this.money < this.upgradeCost) {
+                    new FloatingText(
+                        this,
+                        pointer.x,
+                        pointer.y,
+                        'Insufficient Funds!'
+                    );
+                    return
+                }
+                
                 this.upgradeBusses();
             })
             .on('pointerover', pointer => {
@@ -355,16 +381,20 @@ export default class GameScene extends Phaser.Scene {
             (marker as PotentialStopMarker).onMoneyUpdate(this.money);
         });
 
-        this.upgradeButton
-            .setActive(this.money >= this.upgradeCost)
-            .setVisible(this.money >= this.upgradeCost);
-        this.upgradelanguage
-            .setActive(this.money >= this.upgradeCost)
-            .setVisible(this.money >= this.upgradeCost);
+        // this.upgradeButton
+        //     .setActive(this.money >= this.upgradeCost)
+        //     // .setVisible(this.money >= this.upgradeCost);
+        // this.upgradelanguage
+        //     .setActive(this.money >= this.upgradeCost)
+        //     // .setVisible(this.money >= this.upgradeCost);
 
         if (!this.hasShownUpgradeHelp && this.money >= this.upgradeCost) {
             //show upgrade helper here
             new UpgradeHelp(this);
+            this.hasShownUpgradeHelp = true;
+            this.upgradeButton.setActive(true).setVisible(true)
+            this.upgradelanguage.setActive(true).setVisible(true)
+
         }
     }
 
