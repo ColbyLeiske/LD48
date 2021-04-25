@@ -145,14 +145,13 @@ export default class GameScene extends Phaser.Scene {
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 2; // technically in screen space and eucledian distance
+                    const minDistance = 100; // technically in screen space and eucledian distance
 
-                    // const suitableEnds = this.grid.getNodesInRange(
-                    //     node,
-                    //     minDistance
-                    // );
-                    const suitableEnds = this.grid.nodes;
-                    console.log(`within range ${JSON.stringify(suitableEnds)}`);
+                    const suitableEnds = this.grid.getNodesInRange(
+                        node,
+                        minDistance
+                    );
+                    // const suitableEnds = this.grid.nodes;
                     // const prunedEnds = suitableEnds.filter(node => {
                     //     console.log(
                     //         `pathing between ${this.potentialFirstStop?.getData(

@@ -15,15 +15,24 @@ const fs = require('fs')
 //     return node
 // })
 
-const modifiedWeights = data.connections.map((edge) => {
-    const { x: x1, y: y1 } = data.nodes[edge.source]
-    const { x: x2, y: y2 } = data.nodes[edge.dest]
-    const newWeight = Math.max(Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)), 1);
-    console.log(newWeight)
-    return {source:edge.source,dest:edge.dest,weight:newWeight}
+// const modifiedWeights = data.connections.map((edge) => {
+//     const { x: x1, y: y1 } = data.nodes[edge.source]
+//     const { x: x2, y: y2 } = data.nodes[edge.dest]
+//     const newWeight = Math.max(Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)), 1);
+//     console.log(newWeight)
+//     return {source:edge.source,dest:edge.dest,weight:newWeight}
+// })
+const missingDouble = data.connections.filter((edge) => {
+    return !data.connections.reduce((acc,curr) => {
+        return acc || (edge.dest == curr.source && edge.source == curr.dest)
+    },false)
 })
+console.log('the following are missing a bidirectional edge',missingDouble)
 
-const connections = modifiedWeights
+missingDouble.forEach((edge) => {
+    data.connections.push({source:edge.dest,dest:edge.source,weight:edge.weight})
+})
+const connections = data.connections
 const nodes = data.nodes
 
 // console.log(JSON.stringify({connections:n,nodes:data.nodes}))

@@ -66,27 +66,23 @@ export default class Grid {
         const next = Array(this.nodes.length)
             .fill(null)
             .map(() => {
-                return Array(this.nodes.length).fill(undefined);
+                return Array(this.nodes.length).fill(null);
             });
+
+        this.edges.forEach(edge => {
+            const { source, dest, weight } = edge;
+            console.log('asdfasdfasdfasdfg');
+            dist[source][dest] = weight;
+        });
 
         this.nodes.forEach((startNode, startIndex) => {
             this.nodes.forEach((endNode, endIndex) => {
-                if (startNode === endNode) {
-                    dist[startIndex][endIndex] = 0;
+                if (startNode.id === endNode.id) {
+                    next[startIndex][endIndex] = -1; //is itself
+                } else if (dist[startIndex][endIndex] != Infinity) {
+                    next[startIndex][endIndex] = startNode.id;
                 } else {
-                    const edge = this.edges.filter(edges => {
-                        return (
-                            edges.source === startNode.id &&
-                            edges.dest === endNode.id
-                        );
-                    });
-                    if (edge.length) {
-                        const rEdge = edge[0];
-                        dist[startIndex][endIndex] = rEdge.weight;
-                        next[startIndex][endIndex] = startNode.id;
-                    } else {
-                        dist[startIndex][endIndex] = Infinity;
-                    }
+                    next[startIndex][endIndex] = undefined;
                 }
             });
         });
@@ -107,7 +103,8 @@ export default class Grid {
                     if (dist[startIndex][endIndex] > distViaMiddle) {
                         // We've found a shortest pass via middle vertex.
                         dist[startIndex][endIndex] = distViaMiddle;
-                        next[startIndex][endIndex] = middleVertex.id;
+                        next[startIndex][endIndex] =
+                            next[middleIndex][endIndex];
                     }
                 });
             });
@@ -115,7 +112,7 @@ export default class Grid {
         return { dist, next };
     }
 
-    public getPath(nodeA: Node, nodeB: Node) {
+    public getPathOld(nodeA: Node, nodeB: Node) {
         // if (this.memoPath.get({n1:nodeA.id,n2:nodeB.id}])) {
         //     return this.memoPath[nodeA.id][nodeB.id]
         // }
@@ -123,28 +120,52 @@ export default class Grid {
 
         if (!this.paths) return [];
         if (
-            this.paths[nodeA.id][nodeB.id+1] === undefined ||
-            this.paths[nodeA.id][nodeB.id+1] === Infinity
+            this.paths[nodeA.id][nodeB.id] === undefined ||
+            this.paths[nodeA.id][nodeB.id] === Infinity
         ) {
             console.log('path is undefined or infinity');
             return [];
         }
         let path = [nodeA];
-        let counter = 0
-        let prevNode = nodeA.id
+        let counter = 0;
+        let prevNode = nodeA.id;
         while (nodeA.id != nodeB.id) {
             if (prevNode == nodeA.id && counter > 10) {
-                console.log('preventing infiinite loop')
-                return []
+                console.log('preventing infiinite loop');
+                return [];
             }
-            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id+1]);
-            path.push(nodeA);
+            const newNode = this.getNodeById(this.paths[nodeA.id][nodeB.id]);
+            // if (newNode == nodeA) {
+            //     path.push(nodeB);
+            //     return path;
+            // }
+            path.push(newNode);
+            nodeA = newNode;
             console.log('looking at ', nodeA);
-            prevNode = nodeA.id
-            counter++
+            prevNode = nodeA.id;
+            counter++;
         }
         return path;
     }
+
+    public getPathRec(nodeA: Node, nodeB: Node):any[] {
+        if (this.paths[nodeA.id][nodeB.id] === nodeA.id) {
+            return [nodeB];
+        }
+        const newpath = [nodeB].concat(
+            this.getPathRec(
+                nodeA,
+                this.getNodeById(this.paths[nodeA.id][nodeB.id])
+            )
+        );
+        return newpath
+    }
+    public getPath(nodeA: Node, nodeB: Node) {
+        const path = this.getPathRec(nodeA,nodeB)
+        path.push(nodeA)
+        return path.reverse()
+    }
+
     public getPathById(nodeA: number, nodeB: number) {
         return this.getPath(this.getNodeById(nodeA), this.getNodeById(nodeB));
     }
@@ -192,8 +213,8 @@ export default class Grid {
         const { dist: weights, next: paths } = this.floydWarshallAlgorithm();
         this.paths = paths;
         this.weights = weights;
-        console.log(weights);
-        console.log(paths);
+        // console.log(weights);
+        // console.log(paths);
         // console.log(this.getPath(nodes[0],nodes[12]))
     }
 }
