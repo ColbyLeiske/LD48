@@ -84,6 +84,7 @@ export default class GameScene extends Phaser.Scene {
         this.moneyText = new MoneyText(this);
         const swapKey = this.input.keyboard.addKey('Q');
         swapKey.on('down', evt => {
+            if (this.input.keyboard.addKey('U').isUp) return;
             this.scene.start('editorScene');
         });
         this.grid = new Grid();
@@ -295,7 +296,7 @@ export default class GameScene extends Phaser.Scene {
             .setVisible(false);
         //some new route button
         this.newRouteButton = this.add
-            .rectangle(1200, 685, 120, 42, 0x00ff00)
+            .rectangle(1200, 685, 120, 42, 0xc3ecb2)
             .setInteractive()
             .on('pointerdown', pointer => {
                 this.toggleNewRoute();
@@ -312,20 +313,15 @@ export default class GameScene extends Phaser.Scene {
             .setColor('black')
             .setVisible(false);
         this.upgradeButton = this.add
-            .rectangle(1200, 620, 120, 42, 0x00ff00)
+            .rectangle(1200, 620, 120, 42, 0xaaaaaa)
             .setInteractive()
             .on('pointerdown', pointer => {
                 //upgrade busses which increases reliability and speed?
-                if  (this.money < this.upgradeCost) {
-                    new FloatingText(
-                        this,
-                        1138,
-                        570,
-                        'Insufficient Funds!'
-                    );
-                    return
+                if (this.money < this.upgradeCost) {
+                    new FloatingText(this, 1138, 570, 'Insufficient Funds!');
+                    return;
                 }
-                
+
                 this.upgradeBusses();
             })
             .on('pointerover', pointer => {
@@ -334,13 +330,13 @@ export default class GameScene extends Phaser.Scene {
             })
             .on('pointerout', pointer => {
                 this.upgradeText.setActive(false).setVisible(false);
-            })
-            .setVisible(false)
-            .setActive(false);
+            });
+        // .setVisible(false)
+        // .setActive(false);
         this.upgradelanguage = this.add
             .text(1168, 605, 'Upgrade\n Buses')
-            .setColor('black')
-            .setVisible(false);
+            .setColor('black');
+        // .setVisible(false);
 
         new IntroHelp(this);
         // new UpgradeHelp(this)
@@ -374,7 +370,7 @@ export default class GameScene extends Phaser.Scene {
             this.newRouteButton.setFillStyle(0xaaaaaa);
         } else {
             this.newRouteButton.setActive(true);
-            this.newRouteButton.setFillStyle(0x00ff00);
+            this.newRouteButton.setFillStyle(0xc3ecb2);
         }
 
         this.potentialStopMarkers.getChildren().forEach(marker => {
@@ -388,13 +384,17 @@ export default class GameScene extends Phaser.Scene {
         //     .setActive(this.money >= this.upgradeCost)
         //     // .setVisible(this.money >= this.upgradeCost);
 
+        if (this.money >= this.upgradeCost) {
+            this.upgradeButton.setFillStyle(0xc3ecb2);
+        } else {
+            this.upgradeButton.setFillStyle(0xaaaaaa);
+        }
         if (!this.hasShownUpgradeHelp && this.money >= this.upgradeCost) {
             //show upgrade helper here
             new UpgradeHelp(this);
             this.hasShownUpgradeHelp = true;
-            this.upgradeButton.setActive(true).setVisible(true)
-            this.upgradelanguage.setActive(true).setVisible(true)
-
+            this.upgradeButton.setActive(true).setVisible(true);
+            this.upgradelanguage.setActive(true).setVisible(true);
         }
     }
 
@@ -403,7 +403,7 @@ export default class GameScene extends Phaser.Scene {
         this.busses.forEach(bus => {
             bus.upgrade();
         });
-        this.editMoney(-this.upgradeCost)
+        this.editMoney(-this.upgradeCost);
         this.upgradeCost =
             this.upgradeBaseCost *
             (this.upgradeCount * this.upgradeCostModifier);

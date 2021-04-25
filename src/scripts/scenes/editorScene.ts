@@ -21,6 +21,7 @@ export default class EditorScene extends Phaser.Scene {
         this.grid = new Grid();
         this.add.sprite(0, 0, 'map').setOrigin(0);
 
+        this.add.text(50,50,"MAP EDITOR - PRESS Q TO RETURN TO GAME")
         const swapKey = this.input.keyboard.addKey('Q');
         swapKey.on('down', evt => {
             this.scene.start('GameScene');
