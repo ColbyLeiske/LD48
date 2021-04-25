@@ -319,8 +319,8 @@ export default class GameScene extends Phaser.Scene {
                 if  (this.money < this.upgradeCost) {
                     new FloatingText(
                         this,
-                        pointer.x,
-                        pointer.y,
+                        1138,
+                        570,
                         'Insufficient Funds!'
                     );
                     return
@@ -403,6 +403,7 @@ export default class GameScene extends Phaser.Scene {
         this.busses.forEach(bus => {
             bus.upgrade();
         });
+        this.editMoney(-this.upgradeCost)
         this.upgradeCost =
             this.upgradeBaseCost *
             (this.upgradeCount * this.upgradeCostModifier);
