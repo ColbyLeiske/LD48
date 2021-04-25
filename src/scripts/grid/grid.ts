@@ -71,7 +71,6 @@ export default class Grid {
 
         this.edges.forEach(edge => {
             const { source, dest, weight } = edge;
-            console.log('asdfasdfasdfasdfg');
             dist[source][dest] = weight;
         });
 

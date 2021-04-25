@@ -36,8 +36,10 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             let onComplete = () => {};
             if (i - 1 === 0) {
                 onComplete = () => {
-                    (scene as GameScene).editMoney(Math.trunc(totalDistance)/2);
-                    new MoneyMade(scene, x1, y1,Math.trunc(totalDistance)/2); // JUUUIIIIICCCCEEE
+                    
+                    const amountMade =Math.trunc(totalDistance/4 );
+                    (scene as GameScene).editMoney(amountMade);
+                    new MoneyMade(scene, x1, y1,amountMade); // JUUUIIIIICCCCEEE
                 };
             }
             this.tweenTimeline.add({

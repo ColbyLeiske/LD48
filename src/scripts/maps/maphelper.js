@@ -23,17 +23,17 @@ const fs = require('fs')
 //     return {source:edge.source,dest:edge.dest,weight:newWeight}
 // })
 const missingDouble = data.connections.filter((edge) => {
-    return !data.connections.reduce((acc,curr) => {
+    return !data.connections.reduce((acc, curr) => {
         return acc || (edge.dest == curr.source && edge.source == curr.dest)
-    },false)
+    }, false)
 })
-console.log('the following are missing a bidirectional edge',missingDouble)
+console.log('the following are missing a bidirectional edge', missingDouble)
 
 missingDouble.forEach((edge) => {
-    data.connections.push({source:edge.dest,dest:edge.source,weight:edge.weight})
+    data.connections.push({ source: edge.dest, dest: edge.source, weight: edge.weight })
 })
 const connections = data.connections
 const nodes = data.nodes
 
 // console.log(JSON.stringify({connections:n,nodes:data.nodes}))
-fs.writeFileSync('./newmap.json',JSON.stringify({connections,nodes}))
+fs.writeFileSync('./newmap.json', JSON.stringify({ connections, nodes }))

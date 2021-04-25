@@ -6,6 +6,7 @@ import Node from '../grid/node';
 
 import _ from 'lodash';
 import Bus from '../objects/bus';
+import PotentialStopMarker from '../objects/potentialMarker';
 
 export default class GameScene extends Phaser.Scene {
     grid: Grid;
@@ -16,12 +17,16 @@ export default class GameScene extends Phaser.Scene {
     modeText: Phaser.GameObjects.Text;
     potentialStopMarkers: Phaser.GameObjects.Group;
 
-    potentialFirstStop: Phaser.GameObjects.Sprite | undefined;
+    potentialFirstStop: PotentialStopMarker | undefined;
 
     routes: any[] = [];
     busses: Bus[] = [];
     money = 500;
     moneyText: MoneyText;
+    distanceModifier = 1.75;
+    routeCountModifier = 1.2;
+
+    firstStop: StopMarker;
 
     colors: number[] = [
         0x1ea362,
@@ -56,11 +61,13 @@ export default class GameScene extends Phaser.Scene {
         this.grid.nodes
             .filter(node => node.canBeBusstop)
             .forEach(node => {
-                const marker = this.add
-                    .sprite(node.x + 2, node.y - 10, 'stopPin')
-                    .setInteractive()
-                    .setDataEnabled()
-                    .setData('nodeid', node.id);
+                const marker = new PotentialStopMarker(
+                    this,
+                    node.x + 2,
+                    node.y - 10,
+                    200,
+                    node.id
+                );
 
                 marker.on('pointerdown', pointer => {
                     const inspectKey = this.input.keyboard.addKey('V');
@@ -72,9 +79,25 @@ export default class GameScene extends Phaser.Scene {
                     if (this.potentialFirstStop === marker) {
                         this.potentialFirstStop = undefined;
                         marker.clearTint();
-                        this.potentialStopMarkers
-                            .setVisible(true)
-                            .setActive(true);
+                        this.potentialStopMarkers.setVisible(true);
+                        this.potentialStopMarkers.getChildren().forEach(oM => {
+                            const m = oM as PotentialStopMarker;
+                            let newCost = this.baseStopCost;
+                            if (this.firstStop) {
+                                newCost =
+                                    this.baseStopCost +
+                                    (this.grid.weights[this.firstStop.id][
+                                        m.getData('nodeid')
+                                    ] *
+                                        this.distanceModifier +
+                                        this.routes.length *
+                                            this.routeCountModifier);
+                            }
+
+                            m.cost = newCost;
+                            m.onMoneyUpdate(this.money);
+                        });
+                        // .setActive(true);
                         return;
                     }
                     //about to finalize new route
@@ -88,13 +111,15 @@ export default class GameScene extends Phaser.Scene {
                             this,
                             this.potentialFirstStop.x - 2,
                             this.potentialFirstStop.y - 2,
-                            color
+                            color,
+                            this.potentialFirstStop.getData('nodeid')
                         );
                         const pinB = new StopMarker(
                             this,
                             marker.x - 2,
                             marker.y - 2,
-                            color
+                            color,
+                            marker.getData('nodeid')
                         );
                         console.log(
                             'some info',
@@ -125,7 +150,8 @@ export default class GameScene extends Phaser.Scene {
                             id: this.routes.length,
                             locations: locationsToDraw,
                         };
-                        this.routes.push();
+                        if (this.routes.length == 0) this.firstStop = pinA;
+                        this.routes.push(route);
                         this.potentialFirstStop.setData('isBusStop', true);
                         marker.setData('isBusStop', true);
                         this.potentialStopMarkers.remove(marker, true);
@@ -137,6 +163,20 @@ export default class GameScene extends Phaser.Scene {
                         this.editMoney(-this.stopCost);
                         //spawn our bus and get it to start making money
                         this.busses.push(new Bus(this, route));
+                        this.potentialStopMarkers.getChildren().forEach(oM => {
+                            const m = oM as PotentialStopMarker;
+                            let newCost =
+                                this.baseStopCost +
+                                (this.grid.weights[this.firstStop.id][
+                                    m.getData('nodeid')
+                                ] *
+                                    this.distanceModifier +
+                                    this.routes.length *
+                                        this.routeCountModifier);
+
+                            m.cost = newCost;
+                            m.onMoneyUpdate(this.money);
+                        });
                         return;
                     }
 
@@ -151,21 +191,34 @@ export default class GameScene extends Phaser.Scene {
                         node,
                         minDistance
                     );
-                    // const suitableEnds = this.grid.nodes;
-                    // const prunedEnds = suitableEnds.filter(node => {
-                    //     console.log(
-                    //         `pathing between ${this.potentialFirstStop?.getData(
-                    //             'nodeid'
-                    //         )} and ${node.id}`
-                    //     );
-                    //     return (
-                    //         this.grid.getPathById(
-                    //             this.potentialFirstStop?.getData('nodeid'),
-                    //             node.id
-                    //         ).length != 0
-                    //     );
-                    // });
+
                     const suitableIds = suitableEnds.map(n => n.id);
+                    //with side effects update the cost of these markers and trigger on money update
+
+                    const markersToAffect = this.potentialStopMarkers
+                        .getChildren()
+                        .filter(marker => {
+                            return suitableIds.includes(
+                                marker.getData('nodeid')
+                            );
+                        });
+                    markersToAffect.forEach(oM => {
+                        const m = oM as PotentialStopMarker;
+                        let newCost =
+                            this.baseStopCost +
+                            (this.grid.weights[marker.getData('nodeid')][
+                                m.getData('nodeid')
+                            ] *
+                                this.distanceModifier +
+                                this.routes.length * this.routeCountModifier);
+                        if (this.firstStop) {
+                            newCost += this.grid.weights[this.firstStop.id][
+                                m.getData('nodeid')
+                            ];
+                        }
+                        m.cost = newCost;
+                        m.onMoneyUpdate(this.money);
+                    });
                     // console.log(suitableIds)
                     this.potentialStopMarkers
                         .getChildren()
@@ -228,7 +281,6 @@ export default class GameScene extends Phaser.Scene {
     }
 
     public editMoney(amountToAdd) {
-        console.log('updating money');
         this.money += amountToAdd;
 
         if (this.money < this.stopCost) {
@@ -238,6 +290,10 @@ export default class GameScene extends Phaser.Scene {
             this.newRouteButton.setActive(true);
             this.newRouteButton.setFillStyle(0x00ff00);
         }
+
+        this.potentialStopMarkers.getChildren().forEach(marker => {
+            (marker as PotentialStopMarker).onMoneyUpdate(this.money);
+        });
     }
 
     update(time, delta) {
