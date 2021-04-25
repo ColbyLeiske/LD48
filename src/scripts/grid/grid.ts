@@ -12,14 +12,19 @@ export default class Grid {
 
     public addConnection(a: Node, b: Node, weight?: number) {
         // set both ways for bidirectional graph
+        console.log({
+            source: a.id,
+            dest: b.id,
+            weight: weight || 1,
+        })
         this.edges.push({
             source: a.id,
             dest: b.id,
             weight: weight || 1,
         });
         this.edges.push({
-            dest: a.id,
             source: b.id,
+            dest: a.id,
             weight: weight || 1,
         });
     }
@@ -28,6 +33,10 @@ export default class Grid {
         return this.edges.filter(conn => {
             conn.source === node || conn.dest === node;
         });
+    }
+
+    public doesConnectionExist(a: Node, b: Node, weight){
+        return this.edges.includes
     }
 
     public getNode({ x: dx, y: dy }) {
