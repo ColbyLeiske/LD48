@@ -45,10 +45,10 @@ export default class GameScene extends Phaser.Scene {
     create() {
         this.add.sprite(0, 0, 'map').setOrigin(0);
         this.moneyText = new MoneyText(this);
-        const swapKey = this.input.keyboard.addKey('Q')
-        swapKey.on('down',(evt) => {
-          this.scene.start('editorScene')
-        })
+        const swapKey = this.input.keyboard.addKey('Q');
+        swapKey.on('down', evt => {
+            this.scene.start('editorScene');
+        });
         this.grid = new Grid();
         this.grid.loadFromJSON(mapData);
 
@@ -96,14 +96,20 @@ export default class GameScene extends Phaser.Scene {
                             marker.y - 2,
                             color
                         );
+                        console.log(
+                            'some info',
+                            this.potentialFirstStop.getData('nodeid'),
+                            marker.getData('nodeid')
+                        );
                         const path = this.grid.getPathById(
                             this.potentialFirstStop.getData('nodeid'),
                             marker.getData('nodeid')
                         );
+                        console.log('path', path);
                         const locationsToDraw = path.map(node => {
                             return [node.x, node.y];
                         });
-                        console.log(locationsToDraw);
+                        console.log('loc', locationsToDraw);
                         let routeLines: Phaser.GameObjects.Line[] = [];
                         for (let i = 1; i < locationsToDraw.length; i++) {
                             const [x1, y1] = locationsToDraw[i - 1];
@@ -139,13 +145,14 @@ export default class GameScene extends Phaser.Scene {
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 2;// technically in screen space and eucledian distance
+                    const minDistance = 2; // technically in screen space and eucledian distance
 
-                    const suitableEnds = this.grid.getNodesInRange(
-                        node,
-                        minDistance
-                    );
-                    console.log(`within range ${JSON.stringify(suitableEnds)}`)
+                    // const suitableEnds = this.grid.getNodesInRange(
+                    //     node,
+                    //     minDistance
+                    // );
+                    const suitableEnds = this.grid.nodes;
+                    console.log(`within range ${JSON.stringify(suitableEnds)}`);
                     // const prunedEnds = suitableEnds.filter(node => {
                     //     console.log(
                     //         `pathing between ${this.potentialFirstStop?.getData(

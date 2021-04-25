@@ -12,20 +12,15 @@ export default class Grid {
 
     public addConnection(a: Node, b: Node, weight?: number) {
         // set both ways for bidirectional graph
-        console.log({
-            source: a.id,
-            dest: b.id,
-            weight: weight || 1,
-        })
         this.edges.push({
             source: a.id,
             dest: b.id,
-            weight: weight || 1,
+            weight: weight || 100,
         });
         this.edges.push({
             source: b.id,
             dest: a.id,
-            weight: weight || 1,
+            weight: weight || 100,
         });
     }
 
@@ -35,8 +30,8 @@ export default class Grid {
         });
     }
 
-    public doesConnectionExist(a: Node, b: Node, weight){
-        return this.edges.includes
+    public doesConnectionExist(a: Node, b: Node, weight) {
+        return this.edges.includes;
     }
 
     public getNode({ x: dx, y: dy }) {
@@ -63,43 +58,56 @@ export default class Grid {
 
     //https://www.tutorialspoint.com/The-Floyd-Warshall-algorithm-in-Javascript
     public floydWarshallAlgorithm() {
-        let dist = {};
-        let next = {};
-
-        for (let i = 0; i < this.nodes.length; i++) {
-            dist[i] = [];
-            next[i] = [];
-        }
-
-        for (let i = 0; i < this.nodes.length; i++) {
-            // For existing edges assign the dist to be same as weight
-            this.edges.forEach(e => {
-                dist[e.source][e.dest] = e.weight;
-                next[e.source][e.dest] = e.dest;
+        const dist = Array(this.nodes.length)
+            .fill(null)
+            .map(() => {
+                return Array(this.nodes.length).fill(Infinity);
             });
-            this.nodes.forEach(n => {
-                // For all other nodes assign it to infinity
-                if (dist[this.nodes[i].id][n.id] == undefined)
-                    dist[this.nodes[i].id][n.id] = Infinity;
-                // For self edge assign dist to be 0
-                if (this.nodes[i].id === i) {
-                    dist[i][i] = 0;
-                    next[i][i] = i;
+        const next = Array(this.nodes.length)
+            .fill(null)
+            .map(() => {
+                return Array(this.nodes.length).fill(undefined);
+            });
+
+        this.nodes.forEach((startNode, startIndex) => {
+            this.nodes.forEach((endNode, endIndex) => {
+                if (startNode === endNode) {
+                    dist[startIndex][endIndex] = 0;
+                } else {
+                    const edge = this.edges.filter(edges => {
+                        return (
+                            edges.source === startNode.id &&
+                            edges.dest === endNode.id
+                        );
+                    });
+                    if (edge.length) {
+                        const rEdge = edge[0];
+                        dist[startIndex][endIndex] = rEdge.weight;
+                        next[startIndex][endIndex] = startNode.id;
+                    } else {
+                        dist[startIndex][endIndex] = Infinity;
+                    }
                 }
             });
-        }
-        this.nodes.forEach(i => {
-            this.nodes.forEach(j => {
-                this.nodes.forEach(k => {
-                    // Check if going from i to k then from k to j is better
-                    // than directly going from i to j. If yes then update
-                    // i to j value to the new value
-                    if (
-                        dist[i.id][k.id] + dist[k.id][j.id] <
-                        dist[i.id][j.id]
-                    ) {
-                        dist[i.id][j.id] = dist[i.id][k.id] + dist[k.id][j.id];
-                        next[i.id][j.id] = next[i.id][k.id];
+        });
+
+        this.nodes.forEach((middleVertex, middleIndex) => {
+            // Path starts from startVertex with startIndex.
+            this.nodes.forEach((startVertex, startIndex) => {
+                // Path ends to endVertex with endIndex.
+                this.nodes.forEach((endVertex, endIndex) => {
+                    // Compare existing distance from startVertex to endVertex, with distance
+                    // from startVertex to endVertex but via middleVertex.
+                    // Save the shortest distance and previous vertex that allows
+                    // us to have this shortest distance.
+                    const distViaMiddle =
+                        dist[startIndex][middleIndex] +
+                        dist[middleIndex][endIndex];
+
+                    if (dist[startIndex][endIndex] > distViaMiddle) {
+                        // We've found a shortest pass via middle vertex.
+                        dist[startIndex][endIndex] = distViaMiddle;
+                        next[startIndex][endIndex] = middleVertex.id;
                     }
                 });
             });
@@ -111,12 +119,29 @@ export default class Grid {
         // if (this.memoPath.get({n1:nodeA.id,n2:nodeB.id}])) {
         //     return this.memoPath[nodeA.id][nodeB.id]
         // }
+        console.log({ nodeA, nodeB });
+
         if (!this.paths) return [];
-        if (!this.paths[nodeA.id][nodeB.id]) return [];
+        if (
+            this.paths[nodeA.id][nodeB.id+1] === undefined ||
+            this.paths[nodeA.id][nodeB.id+1] === Infinity
+        ) {
+            console.log('path is undefined or infinity');
+            return [];
+        }
         let path = [nodeA];
-        while (nodeA != nodeB) {
-            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id]);
+        let counter = 0
+        let prevNode = nodeA.id
+        while (nodeA.id != nodeB.id) {
+            if (prevNode == nodeA.id && counter > 10) {
+                console.log('preventing infiinite loop')
+                return []
+            }
+            nodeA = this.getNodeById(this.paths[nodeA.id][nodeB.id+1]);
             path.push(nodeA);
+            console.log('looking at ', nodeA);
+            prevNode = nodeA.id
+            counter++
         }
         return path;
     }

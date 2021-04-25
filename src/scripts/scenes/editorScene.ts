@@ -107,10 +107,13 @@ export default class EditorScene extends Phaser.Scene {
             .setOrigin(0);
         cir.on('pointerdown', pointer => {
             const editKey = this.input.keyboard.addKey('E');
+            const touchX = this.input.activePointer.worldX;
+            const touchY = this.input.activePointer.worldY;
+            const coords = {x:touchX,y:touchY}
             if (editKey.isDown) {
                 if (
                     this.editing &&
-                    this.editedStartNode === this.grid.getNode(pointer)
+                    this.editedStartNode === this.grid.getNode(coords)
                 ) {
                     this.editedStartNode = new Node(-1, -1, -1);
                     this.editing = false;
@@ -118,12 +121,12 @@ export default class EditorScene extends Phaser.Scene {
                     return;
                 }
                 if (this.editing) {
-                    const curNode = this.grid.getNode(pointer);
+                    const curNode = this.grid.getNode(coords);
                     if (curNode.id == -1) {
                         console.log('early return');
                         return;
                     }
-                    const weight = Math.trunc(
+                    const weight = Math.round(
                         Math.max(
                             Math.sqrt(
                                 Math.pow(
@@ -147,16 +150,54 @@ export default class EditorScene extends Phaser.Scene {
                         );
                     });
                     if (edge.length) {
+
                         console.log('truying to remove edge');
                         //remove connection and dip
-                        const rEdge = edge[0];
-                        const tempIndex = this.grid.edges.indexOf(rEdge);
-                        this.grid.edges.splice(tempIndex);
-                        console.log(`trying `,{a:this.editedStartNode.id,b:curNode.id})
-                        console.log('lines:',this.lines)
-                        this.lines.get(JSON.stringify({a:this.editedStartNode.id,b:curNode.id}))?.setVisible(false).destroy()
-                        this.lines.get(JSON.stringify({a:curNode.id,b:this.editedStartNode.id}))?.setVisible(false).destroy()
-                        this.lines.delete(JSON.stringify({a:this.editedStartNode.id,b:curNode.id}))
+                        this.grid.edges = this.grid.edges.filter(({ dest, source }) => {
+                          return !(
+                              (this.editedStartNode.id == source &&
+                                  curNode.id == dest) ||
+                              (this.editedStartNode.id == dest &&
+                                  curNode.id == source)
+                          );
+                      });
+                        console.log(`trying `, {
+                            a: this.editedStartNode.id,
+                            b: curNode.id,
+                        });
+                        console.log('lines:', this.lines);
+                        this.lines
+                            .get(
+                                JSON.stringify({
+                                    a: this.editedStartNode.id,
+                                    b: curNode.id,
+                                })
+                            )
+                            ?.setVisible(false)
+                            .destroy();
+                        this.lines
+                            .get(
+                                JSON.stringify({
+                                    a: curNode.id,
+                                    b: this.editedStartNode.id,
+                                })
+                            )
+                            ?.setVisible(false)
+                            .destroy();
+                        this.lines.delete(
+                            JSON.stringify({
+                                a: this.editedStartNode.id,
+                                b: curNode.id,
+                            })
+                        );
+                        this.lines.delete(
+                            JSON.stringify({
+                                a: curNode.id,
+                                b: this.editedStartNode.id,
+                            })
+                        );
+                        this.editedStartNode = new Node(-1, -1, -1);
+                        this.editing = false;
                         return;
                     }
 
@@ -173,16 +214,16 @@ export default class EditorScene extends Phaser.Scene {
                 }
                 console.log('now editing');
                 this.editing = true;
-                this.editedStartNode = this.grid.getNode(pointer);
+                this.editedStartNode = this.grid.getNode(coords);
             }
             const inspectKey = this.input.keyboard.addKey('V');
             if (inspectKey.isDown) {
-                console.log(this.grid.getNode(pointer));
+                console.log(this.grid.getNode(coords));
             }
 
             const noBusStopKey = this.input.keyboard.addKey('B');
             if (noBusStopKey.isDown) {
-                const node = this.grid.getNode(pointer);
+                const node = this.grid.getNode(coords);
                 this.grid.nodes[node.id].canBeBusstop = !this.grid.nodes[
                     node.id
                 ].canBeBusstop;
@@ -203,8 +244,7 @@ export default class EditorScene extends Phaser.Scene {
             )
             .setOrigin(0);
         this.lines.set(JSON.stringify({ a: nodeA.id, b: nodeB.id }), line);
-        console.log({ a: nodeA.id, b: nodeB.id }, line)
-        return
+        return;
         // .setInteractive()
         // .on('pointerdown', pointer => {
         //     const newWeight = prompt('enter new weight of connection', '');
