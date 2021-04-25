@@ -11,6 +11,6 @@ export default class FloatingText extends Phaser.GameObjects.Text {
                 this.destroy();
             },
         });
-        this.setOrigin(0).setDepth(1000);
+        this.setOrigin(0).setDepth(999);
     }
 }

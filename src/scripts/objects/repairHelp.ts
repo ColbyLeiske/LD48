@@ -17,6 +17,6 @@ export default class RepairHelp extends Phaser.GameObjects.Group {
                 this.setActive(false).setVisible(false).destroy()
             })
         })
-        this.setDepth(1000);
+        this.setDepth(1001);
     }
 }

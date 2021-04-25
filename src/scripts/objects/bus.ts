@@ -6,6 +6,10 @@ import RepairHelp from './repairHelp';
 export default class Bus extends Phaser.GameObjects.Sprite {
     ticks = 0;
     timeTillBreakdownChance = 60 * 15; // 1 second times 15 seconds
+    minTime = 10;
+    maxTime = 20;
+    baseMinTime = 10;
+    baseMaxTime = 20;
     tweenTimeline: Phaser.Tweens.Timeline;
     breakdownThreshold = 50;
 
@@ -100,6 +104,7 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             duration: 250,
         });
         this.tweenTimeline.play();
+        this.upgrade();
 
         scene.add.existing(this);
     }
@@ -119,7 +124,7 @@ export default class Bus extends Phaser.GameObjects.Sprite {
 
             if (!this.scene.hasHadBreakdown) {
                 this.scene.hasHadBreakdown = true;
-                new RepairHelp(this.scene)
+                new RepairHelp(this.scene);
             }
 
             console.log('bus broke down');
@@ -133,6 +138,17 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             });
             this.ticks = 0;
         }
+    }
+
+    public upgrade() {
+        this.breakdownThreshold = Math.min(
+            50 + this.scene.upgradeCount * 4,
+            99
+        ); //always chance to break
+        this.minTime = this.baseMinTime + 2 * this.scene.upgradeCount;
+        this.maxTime = this.baseMinTime + 2 * this.scene.upgradeCount;
+        new FloatingText(this.scene, this.x - 20, this.y - 19, 'Upgraded!');
+        this.tweenTimeline.timeScale = Math.max(1.1 * this.scene.upgradeCount,1);
     }
 
     private randomInteger(min, max) {

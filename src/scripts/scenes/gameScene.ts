@@ -11,6 +11,7 @@ import FloatingText from '../objects/floatingText';
 import IntroHelp from '../objects/introHelp';
 import FirstMadeHelp from '../objects/firstStopMade';
 import RepairHelp from '../objects/repairHelp';
+import UpgradeHelp from '../objects/upgradeHelp';
 
 export default class GameScene extends Phaser.Scene {
     grid: Grid;
@@ -49,6 +50,15 @@ export default class GameScene extends Phaser.Scene {
     stopCost = 200;
     baseStopCost = 250;
 
+    upgradeBaseCost = 1000;
+    upgradeCount = 0;
+    upgradeCostModifier = 1.75;
+    upgradeCost =
+        this.upgradeBaseCost + this.upgradeCount * this.upgradeCostModifier;
+    upgradeText: Phaser.GameObjects.Text;
+    upgradeButton: Phaser.GameObjects.Rectangle;
+    hasShownUpgradeHelp = false;
+    upgradelanguage: Phaser.GameObjects.Text;
     constructor() {
         super({ key: 'GameScene' });
     }
@@ -281,7 +291,33 @@ export default class GameScene extends Phaser.Scene {
             }
         });
 
-        new IntroHelp(this)
+        this.upgradeText = this.add
+            .text(1180, 575, `$${this.upgradeCost}`)
+            .setColor('black')
+            .setVisible(false);
+        this.upgradeButton = this.add
+            .rectangle(1200, 620, 120, 42, 0x00ff00)
+            .setInteractive()
+            .on('pointerdown', pointer => {
+                //upgrade busses which increases reliability and speed?
+                this.upgradeBusses();
+            })
+            .on('pointerover', pointer => {
+                this.upgradeText.setText(`$${this.upgradeCost}`);
+                this.upgradeText.setActive(true).setVisible(true);
+            })
+            .on('pointerout', pointer => {
+                this.upgradeText.setActive(false).setVisible(false);
+            })
+            .setVisible(false)
+            .setActive(false);
+        this.upgradelanguage = this.add
+            .text(1168, 605, 'Upgrade\n Buses')
+            .setColor('black')
+            .setVisible(false);
+
+        new IntroHelp(this);
+        // new UpgradeHelp(this)
         // new FirstMadeHelp(this);
         // new RepairHelp(this)
     }
@@ -318,6 +354,29 @@ export default class GameScene extends Phaser.Scene {
         this.potentialStopMarkers.getChildren().forEach(marker => {
             (marker as PotentialStopMarker).onMoneyUpdate(this.money);
         });
+
+        this.upgradeButton
+            .setActive(this.money >= this.upgradeCost)
+            .setVisible(this.money >= this.upgradeCost);
+        this.upgradelanguage
+            .setActive(this.money >= this.upgradeCost)
+            .setVisible(this.money >= this.upgradeCost);
+
+        if (!this.hasShownUpgradeHelp && this.money >= this.upgradeCost) {
+            //show upgrade helper here
+            new UpgradeHelp(this);
+        }
+    }
+
+    public upgradeBusses() {
+        this.upgradeCount++;
+        this.busses.forEach(bus => {
+            bus.upgrade();
+        });
+        this.upgradeCost =
+            this.upgradeBaseCost *
+            (this.upgradeCount * this.upgradeCostModifier);
+        this.upgradeText.setText(`$${this.upgradeCost}`);
     }
 
     update(time, delta) {
