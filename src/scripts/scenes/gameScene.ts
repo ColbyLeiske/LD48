@@ -7,6 +7,8 @@ import Node from '../grid/node';
 import _ from 'lodash';
 import Bus from '../objects/bus';
 import PotentialStopMarker from '../objects/potentialMarker';
+import FloatingText from '../objects/floatingText';
+import IntroHelp from '../objects/introHelp';
 
 export default class GameScene extends Phaser.Scene {
     grid: Grid;
@@ -24,7 +26,9 @@ export default class GameScene extends Phaser.Scene {
     money = 500;
     moneyText: MoneyText;
     distanceModifier = 1.75;
-    routeCountModifier = 1.2;
+    routeCountModifier = () => {
+        return Math.max(1, Math.log(this.routes.length)) * 1.7;
+    };
 
     firstStop: StopMarker;
 
@@ -91,15 +95,17 @@ export default class GameScene extends Phaser.Scene {
                                     ] *
                                         this.distanceModifier +
                                         this.routes.length *
-                                            this.routeCountModifier);
+                                            this.routeCountModifier());
                             }
 
-                            m.cost = newCost;
+                            m.updateCost(newCost);
                             m.onMoneyUpdate(this.money);
                         });
                         // .setActive(true);
                         return;
                     }
+                    if (!marker.getData('available')) return;
+
                     //about to finalize new route
                     if (this.potentialFirstStop) {
                         //we have picked our two stops
@@ -159,6 +165,8 @@ export default class GameScene extends Phaser.Scene {
                             this.potentialFirstStop,
                             true
                         );
+                        this.potentialFirstStop.destroy()
+                    
                         this.toggleNewRoute();
                         this.editMoney(-this.stopCost);
                         //spawn our bus and get it to start making money
@@ -172,11 +180,18 @@ export default class GameScene extends Phaser.Scene {
                                 ] *
                                     this.distanceModifier +
                                     this.routes.length *
-                                        this.routeCountModifier);
+                                        this.routeCountModifier());
 
-                            m.cost = newCost;
+                            m.updateCost(newCost);
                             m.onMoneyUpdate(this.money);
                         });
+                        new FloatingText(
+                            this,
+                            marker.x,
+                            marker.y,
+                            `New Route!`
+                        ); // JUUUIIIIICCCCEEE
+                        marker.destroy()
                         return;
                     }
 
@@ -185,7 +200,7 @@ export default class GameScene extends Phaser.Scene {
                     marker.setTint(0xaaaa00);
                     marker.tintFill = true;
 
-                    const minDistance = 100; // technically in screen space and eucledian distance
+                    const minDistance = 80; // technically in screen space and eucledian distance
 
                     const suitableEnds = this.grid.getNodesInRange(
                         node,
@@ -210,13 +225,13 @@ export default class GameScene extends Phaser.Scene {
                                 m.getData('nodeid')
                             ] *
                                 this.distanceModifier +
-                                this.routes.length * this.routeCountModifier);
+                                this.routeCountModifier());
                         if (this.firstStop) {
                             newCost += this.grid.weights[this.firstStop.id][
                                 m.getData('nodeid')
                             ];
                         }
-                        m.cost = newCost;
+                        m.updateCost(newCost);
                         m.onMoneyUpdate(this.money);
                     });
                     // console.log(suitableIds)
@@ -260,6 +275,8 @@ export default class GameScene extends Phaser.Scene {
                 this.toggleNewRoute();
             }
         });
+
+        // const intro = new IntroHelp(this)
     }
 
     private toggleNewRoute() {
@@ -303,7 +320,9 @@ export default class GameScene extends Phaser.Scene {
 
         if (this.frameTime > 16.5) {
             this.frameTime = 0;
-
+            this.busses.forEach((bus) => {
+                bus.tick()
+            })
             // Code that relies on a consistent 60 update per second
         }
     }

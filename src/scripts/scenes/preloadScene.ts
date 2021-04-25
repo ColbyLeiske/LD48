@@ -9,6 +9,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('pin','assets/misc/pinclear.png')
     this.load.image('noMoneyPin','assets/misc/nomoneypin.png')
     this.load.image('bus','assets/misc/bus.png')
+    this.load.image('repair','assets/misc/wrench.png')
   }
 
   create() {

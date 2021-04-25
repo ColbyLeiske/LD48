@@ -1,32 +1,74 @@
 import { Tweens } from 'phaser';
 import GameScene from '../scenes/gameScene';
-import MoneyMade from './moneyMade';
+import FloatingText from './floatingText';
 
 export default class Bus extends Phaser.GameObjects.Sprite {
     ticks = 0;
+    timeTillBreakdownChance = 60 * 15; // 1 second times 15 seconds
     tweenTimeline: Phaser.Tweens.Timeline;
+    breakdownThreshold = 50;
+
+    repairWrench: Phaser.GameObjects.Sprite;
+    repairTween: Phaser.Tweens.Tween;
+    isBrokenDown = false;
 
     constructor(scene: Phaser.Scene, public route) {
         super(scene, route.locations[0][0], route.locations[0][1], 'bus');
-        this.setScale(0.2);
-        this.setAngle(-2.5).setZ(5)
+        this.setAngle(-2.5).setDepth(5);
+        this.repairWrench = scene.add
+            .sprite(this.x, this.y, 'repair')
+            .setInteractive()
+            .on('pointerdown', pointer => {
+                //repairing bus here
+                if (!this.isBrokenDown) return;
+
+                this.isBrokenDown = false;
+                this.tweenTimeline.resume();
+                new FloatingText(scene, this.x, this.y, 'Repaired!');
+                scene.add.tween({
+                    targets: this.repairWrench,
+                    alpha: 0,
+                    onComplete: () => {
+                        this.repairWrench.setActive(false).setVisible(false);
+                    },
+                });
+            })
+            .setAngle(75)
+            .setDepth(10)
+            .setActive(false)
+            .setVisible(false);
+        this.repairTween = scene.add.tween({
+            targets: this.repairWrench,
+            scale: 1.3,
+            yoyo: true,
+            loop: -1,
+        });
+        // .setActive(false).setVisible(false)
         this.tweenTimeline = scene.tweens.createTimeline({
             loop: -1,
         });
+
+        const onUpdate = (
+            tween: Phaser.Tweens.Tween,
+            target: Phaser.GameObjects.GameObject
+        ) => {
+            this.repairWrench.setX(tween.getValue(0));
+            this.repairWrench.setY(tween.getValue(1) - 25);
+        };
 
         let totalDistance = 0;
         for (let i = 1; i < route.locations.length; i++) {
             const [x1, y1] = route.locations[i - 1];
             const [x2, y2] = route.locations[i];
-            const distance = Phaser.Math.Distance.Between(x1, y1, x2, y2)
-            totalDistance += distance
+            const distance = Phaser.Math.Distance.Between(x1, y1, x2, y2);
+            totalDistance += distance;
             this.tweenTimeline.add({
                 targets: this,
                 x: x2,
                 y: y2,
                 ease: 'linear',
-                duration:
-                    500 + distance * 15,
+                duration: 500 + distance * 15,
+                onUpdate,
             });
         }
 
@@ -36,10 +78,9 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             let onComplete = () => {};
             if (i - 1 === 0) {
                 onComplete = () => {
-                    
-                    const amountMade =Math.trunc(totalDistance/4 );
+                    const amountMade = Math.trunc(totalDistance / 4);
                     (scene as GameScene).editMoney(amountMade);
-                    new MoneyMade(scene, x1, y1,amountMade); // JUUUIIIIICCCCEEE
+                    new FloatingText(scene, x1, y1, `+ $${amountMade}`); // JUUUIIIIICCCCEEE
                 };
             }
             this.tweenTimeline.add({
@@ -50,6 +91,7 @@ export default class Bus extends Phaser.GameObjects.Sprite {
                 duration:
                     500 + Phaser.Math.Distance.Between(x1, y1, x2, y2) * 15,
                 onComplete,
+                onUpdate,
             });
         }
         this.tweenTimeline.add({
@@ -57,14 +99,37 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             duration: 250,
         });
         this.tweenTimeline.play();
-        this.tweenTimeline.setCallback('onComplete', t => {
-            console.log('done');
-        });
 
         scene.add.existing(this);
     }
 
     public tick() {
-        // in cents
+        if (this.isBrokenDown) return;
+        this.ticks++;
+        if (this.ticks >= this.timeTillBreakdownChance) {
+            const didBreakdown =
+                this.randomInteger(1, 100) > this.breakdownThreshold;
+            this.timeTillBreakdownChance = this.randomInteger(60 * 10, 60 * 20);
+
+            console.log(didBreakdown);
+            if (!didBreakdown) {
+                return;
+            }
+
+            console.log('bus broke down');
+            //we broke down
+            this.tweenTimeline.pause();
+            this.isBrokenDown = true;
+            this.repairWrench.setActive(true).setVisible(true);
+            this.scene.add.tween({
+                targets: this.repairWrench,
+                alpha: 1,
+            });
+            this.ticks = 0;
+        }
+    }
+
+    private randomInteger(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }

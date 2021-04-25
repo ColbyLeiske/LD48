@@ -54,17 +54,22 @@ export default class EditorScene extends Phaser.Scene {
             if (key.isUp) {
                 return;
             }
+            const gkey = this.input.keyboard.addKey('G');
+
 
             const touchX = this.input.activePointer.worldX;
             const touchY = this.input.activePointer.worldY;
             const newNode = new Node(
                 Math.round(touchX),
                 Math.round(touchY),
-                this.grid.nodes.length
+                this.grid.nodes.length,
+                gkey.isUp,//bus stoppable by default
             );
+            const color = newNode.canBeBusstop ? 0x00ff00 : 0xff0000;
+
             this.grid.addNode(newNode);
 
-            this.addNode(touchX, touchY, newNode.id);
+            this.addNode(touchX, touchY, newNode.id,color);
         });
 
         this.input.on(
