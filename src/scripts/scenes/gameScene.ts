@@ -9,6 +9,8 @@ import Bus from '../objects/bus';
 import PotentialStopMarker from '../objects/potentialMarker';
 import FloatingText from '../objects/floatingText';
 import IntroHelp from '../objects/introHelp';
+import FirstMadeHelp from '../objects/firstStopMade';
+import RepairHelp from '../objects/repairHelp';
 
 export default class GameScene extends Phaser.Scene {
     grid: Grid;
@@ -31,7 +33,7 @@ export default class GameScene extends Phaser.Scene {
     };
 
     firstStop: StopMarker;
-
+    hasHadBreakdown = false;
     colors: number[] = [
         0x1ea362,
         0x4a89f3,
@@ -156,7 +158,10 @@ export default class GameScene extends Phaser.Scene {
                             id: this.routes.length,
                             locations: locationsToDraw,
                         };
-                        if (this.routes.length == 0) this.firstStop = pinA;
+                        if (this.routes.length == 0) {
+                            this.firstStop = pinA;
+                            new FirstMadeHelp(this);
+                        }
                         this.routes.push(route);
                         this.potentialFirstStop.setData('isBusStop', true);
                         marker.setData('isBusStop', true);
@@ -165,8 +170,8 @@ export default class GameScene extends Phaser.Scene {
                             this.potentialFirstStop,
                             true
                         );
-                        this.potentialFirstStop.destroy()
-                    
+                        this.potentialFirstStop.destroy();
+
                         this.toggleNewRoute();
                         this.editMoney(-this.stopCost);
                         //spawn our bus and get it to start making money
@@ -191,7 +196,7 @@ export default class GameScene extends Phaser.Scene {
                             marker.y,
                             `New Route!`
                         ); // JUUUIIIIICCCCEEE
-                        marker.destroy()
+                        marker.destroy();
                         return;
                     }
 
@@ -276,7 +281,9 @@ export default class GameScene extends Phaser.Scene {
             }
         });
 
-        // const intro = new IntroHelp(this)
+        new IntroHelp(this)
+        // new FirstMadeHelp(this);
+        // new RepairHelp(this)
     }
 
     private toggleNewRoute() {
@@ -320,9 +327,9 @@ export default class GameScene extends Phaser.Scene {
 
         if (this.frameTime > 16.5) {
             this.frameTime = 0;
-            this.busses.forEach((bus) => {
-                bus.tick()
-            })
+            this.busses.forEach(bus => {
+                bus.tick();
+            });
             // Code that relies on a consistent 60 update per second
         }
     }

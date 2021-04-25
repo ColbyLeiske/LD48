@@ -1,6 +1,7 @@
 import { Tweens } from 'phaser';
 import GameScene from '../scenes/gameScene';
 import FloatingText from './floatingText';
+import RepairHelp from './repairHelp';
 
 export default class Bus extends Phaser.GameObjects.Sprite {
     ticks = 0;
@@ -12,7 +13,7 @@ export default class Bus extends Phaser.GameObjects.Sprite {
     repairTween: Phaser.Tweens.Tween;
     isBrokenDown = false;
 
-    constructor(scene: Phaser.Scene, public route) {
+    constructor(public scene: GameScene, public route) {
         super(scene, route.locations[0][0], route.locations[0][1], 'bus');
         this.setAngle(-2.5).setDepth(5);
         this.repairWrench = scene.add
@@ -114,6 +115,11 @@ export default class Bus extends Phaser.GameObjects.Sprite {
             console.log(didBreakdown);
             if (!didBreakdown) {
                 return;
+            }
+
+            if (!this.scene.hasHadBreakdown) {
+                this.scene.hasHadBreakdown = true;
+                new RepairHelp(this.scene)
             }
 
             console.log('bus broke down');
