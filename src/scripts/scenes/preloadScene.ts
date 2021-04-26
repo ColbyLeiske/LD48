@@ -1,33 +1,35 @@
 export default class PreloadScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'PreloadScene' })
-  }
+    constructor() {
+        super({ key: 'PreloadScene' });
+    }
 
-  preload() {
-    this.load.image('map','assets/maps/startermap.png')
-    this.load.image('stopPin','assets/misc/pin.png')
-    this.load.image('pin','assets/misc/pinclear.png')
-    this.load.image('noMoneyPin','assets/misc/nomoneypin.png')
-    this.load.image('bus','assets/misc/bus.png')
-    this.load.image('repair','assets/misc/wrench.png')
-  }
+    preload() {
+        this.load.image('map', 'assets/maps/startermap.png');
+        this.load.image('stopPin', 'assets/misc/pin.png');
+        this.load.image('pin', 'assets/misc/pinclear.png');
+        this.load.image('noMoneyPin', 'assets/misc/nomoneypin.png');
+        this.load.image('bus', 'assets/misc/bus.png');
+        this.load.image('repair', 'assets/misc/wrench.png');
+    }
 
-  create() {
-    // this.scene.start('editorScene')
-    this.scene.start('GameScene')
+    create() {
+        // this.scene.start('editorScene')
 
-    /**
-     * This is how you would dynamically import the mainScene class (with code splitting),
-     * add the mainScene to the Scene Manager
-     * and start the scene.
-     * The name of the chunk would be 'mainScene.chunk.js
-     * Find more about code splitting here: https://webpack.js.org/guides/code-splitting/
-     */
-    // let someCondition = true
-    // if (someCondition)
-    //   import(/* webpackChunkName: "mainScene" */ './mainScene').then(mainScene => {
-    //     this.scene.add('MainScene', mainScene.default, true)
-    //   })
-    // else console.log('The mainScene class will not even be loaded by the browser')
-  }
+        this.add.text(0, 0, 'Loading...');
+        this.scene.start('GameScene');
+
+        /**
+         * This is how you would dynamically import the mainScene class (with code splitting),
+         * add the mainScene to the Scene Manager
+         * and start the scene.
+         * The name of the chunk would be 'mainScene.chunk.js
+         * Find more about code splitting here: https://webpack.js.org/guides/code-splitting/
+         */
+        // let someCondition = true
+        // if (someCondition)
+        //   import(/* webpackChunkName: "mainScene" */ './mainScene').then(mainScene => {
+        //     this.scene.add('MainScene', mainScene.default, true)
+        //   })
+        // else console.log('The mainScene class will not even be loaded by the browser')
+    }
 }
